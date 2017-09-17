@@ -235,7 +235,8 @@ describe('POST /users', () => {
         .post('/users')
         .send({
           email: users[0],
-          password: '123abc'})
+          password: '123abc'
+        })
         .expect(400)
         .end(done);
   });
@@ -254,7 +255,7 @@ describe('POST /user/login', () => {
           expect(res.header['x-auth']).toExist();
         })
         .end((err, res) => {
-          if(err) {
+          if (err) {
             return done(err);
           }
           User.findById(users[1]).then((user) => {
@@ -279,7 +280,7 @@ describe('POST /user/login', () => {
           expect(res.header['x-auth']).toNotExist();
         })
         .end((err, res) => {
-          if(err) {
+          if (err) {
             return done(err);
           }
           User.findById(users[1]).then((user) => {
@@ -290,3 +291,21 @@ describe('POST /user/login', () => {
   });
 });
 
+describe('DELETE /users/me/token', () => {
+  it('shluld remove auth token on logout', (done) => {
+    request(app)
+        .delete('/users/me/token')
+        .set('x-auth', users[0].tokens[0].token)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            return done(end);
+          }
+
+          User.findById(users[0]._id).then((user) => {
+            expect(user.tokens.length).toBe(0);
+            done();
+          }).catch((e) => done(e));
+        })
+  });
+});
